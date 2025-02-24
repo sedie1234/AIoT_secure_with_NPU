@@ -15,7 +15,7 @@ void print_matrix_uint8(uint8_t **matrix, int rows, int cols) {
     }
 }
 
-void print_matrix_uint8(int **matrix, int rows, int cols) {
+void print_matrix_int(int **matrix, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             printf("%d ", matrix[i][j]);
@@ -32,7 +32,7 @@ uint8_t **allocate_matrix_uint8(int rows, int cols) {
     return matrix;
 }
 
-int **allocate_matrix_uint8(int rows, int cols) {
+int **allocate_matrix_int(int rows, int cols) {
     int **matrix = malloc(rows * sizeof(int *));
     for (int i = 0; i < rows; i++) {
         matrix[i] = malloc(cols * sizeof(int));
