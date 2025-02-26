@@ -172,13 +172,16 @@ uint8_t** mat_normalize(uint32_t **mat, Onnx__ModelProto *model, int w){
         
         for(int j=0; j<n_inputs+n_outputs; j++){
             
-            *(*array + array_index) = (mat[i][j] & 0xff000000) >> 24;
-            *(*array + array_index +1) = (mat[i][j] & 0x00ff0000) >> 16;
-            *(*array + array_index +2) = (mat[i][j] & 0x00ff0000) >> 8;
-            *(*array + array_index +3) = mat[i][j] & 0x000000ff;
+            int ptr_offset = array_index / w;
+
+            *(*(array+ptr_offset) + array_index%w) = (mat[i][j] & 0xff000000) >> 24;
+            *(*(array+ptr_offset) + array_index%w +1) = (mat[i][j] & 0x00ff0000) >> 16;
+            *(*(array+ptr_offset) + array_index%w +2) = (mat[i][j] & 0x00ff0000) >> 8;
+            *(*(array+ptr_offset) + array_index%w +3) = mat[i][j] & 0x000000ff;
 
             array_index+=4;
         }
+        
     }
 
     return array;

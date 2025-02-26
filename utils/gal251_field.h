@@ -17,6 +17,8 @@ typedef struct {
     uint8_t (*gal251_div)(uint8_t, uint8_t);
 }Gal251Op;
 
+Gal251Op init_gal251_ops();
+
 Gal251Field into_gal251(uint8_t num);
 
 uint8_t gal251_add(uint8_t num1, uint8_t num2);
@@ -24,7 +26,8 @@ uint8_t gal251_sub(uint8_t num1, uint8_t num2);
 uint8_t gal251_mult(uint8_t num1, uint8_t num2);
 uint8_t gal251_div(uint8_t num1, uint8_t num2);
 
-int gal251_extended_gcd(uint8_t num);
+int gal251_extended_gcd(int a, int p, int *x, int *y);
+// int gal251_extended_gcd(uint8_t num);
 uint8_t gal251_mult_inverse(uint8_t num);
 
 void gal251_matrix_multiply(uint8_t **A, uint8_t **B, uint8_t **C, int m, int n, int p);

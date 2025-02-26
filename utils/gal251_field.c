@@ -9,6 +9,15 @@
 #include "gal251_field.h"
 #include "matrix.h"
 
+Gal251Op init_gal251_ops() {
+    Gal251Op ops;
+    ops.gal251_add = gal251_add;
+    ops.gal251_sub = gal251_sub;
+    ops.gal251_mult = gal251_mult;
+    ops.gal251_div = gal251_div;
+    return ops;
+}
+
 Gal251Field into_gal251(uint8_t num){
     Gal251Field val;
     if(num > 250){
@@ -25,13 +34,17 @@ Gal251Field into_gal251(uint8_t num){
 uint8_t gal251_add(uint8_t num1, uint8_t num2){
     int _num1 = num1;
     int _num2 = num2;
-    return (_num1 + _num2) % 251;
+    return (num1 >= num2) ? (num1 - num2)%251 : (251 + num1 - num2)%251;
 }
 
 uint8_t gal251_sub(uint8_t num1, uint8_t num2){
     int _num1 = num1;
     int _num2 = num2;
-    return (_num1 - _num2) % 251;
+    if(num1 < num2){
+        return (251 + num1 - num2)%251;
+    }else{
+        return (num1 - num2)%251;
+    }
 }
 
 uint8_t gal251_mult(uint8_t num1, uint8_t num2){
@@ -41,44 +54,44 @@ uint8_t gal251_mult(uint8_t num1, uint8_t num2){
 }
 
 uint8_t gal251_div(uint8_t num1, uint8_t num2){
-    int num2_inv = gal251_mult_inverse(num2);
-    int val = num2_inv * num1;
-    return val % 251;
+    if (num2 == 0) {
+        printf("[Error] Division by zero in GF(251)\n");
+        exit(EXIT_FAILURE);
+    }
+    uint8_t num2_inv = gal251_mult_inverse(num2);
+    return gal251_mult(num1, num2_inv);
 }
 
-int gal251_extended_gcd(uint8_t num){
-    int old_r = num;
-    int r = 251;
-    int old_s = 1;
-    int s = 0;
-
-    while(r != 0){
-        int quotient = old_r/r;
-        int temp_r = r;
-        int temp_s = s;
-        r = old_r - quotient * r;
-        old_r = temp_r;
-
-        s = old_s - quotient * s;
-        old_s  = temp_s;
+int gal251_extended_gcd(int a, int p, int *x, int *y) {
+    if (a == 0) {
+        *x = 0;
+        *y = 1;
+        return p;
     }
-
-    if (old_r != 1){
-        printf("[Error] number %d has no inverse in gal251 field\n");
-        return -1;
-    }
-
-    return old_s;
+    int x1, y1;
+    int gcd = gal251_extended_gcd(p % a, a, &x1, &y1);
+    *x = y1 - (p / a) * x1;
+    *y = x1;
+    return gcd;
 }
 
-uint8_t gal251_mult_inverse(uint8_t num){
-    int val = gal251_extended_gcd(num);
-     return val % 251;
+uint8_t gal251_mult_inverse(uint8_t a) {
+    if (a == 0) {
+        printf("[Error] Zero has no multiplicative inverse in GF(251)\n");
+        exit(EXIT_FAILURE);
+    }
+    int x, y;
+    int gcd = gal251_extended_gcd(a, 251, &x, &y);
+    if (gcd != 1) {
+        printf("[Error] %d has no inverse in GF(251)\n", a);
+        exit(EXIT_FAILURE);
+    }
+    return (x % 251 + 251) % 251;
 }
 
 void gal251_matrix_multiply(uint8_t **A, uint8_t **B, uint8_t **C, int m, int n, int p){
     int** _C = allocate_matrix_int(m, p);
-    Gal251Op field_operator;
+    Gal251Op field_operator = init_gal251_ops();
 
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < p; j++) {
@@ -96,7 +109,7 @@ void gal251_matrix_multiply(uint8_t **A, uint8_t **B, uint8_t **C, int m, int n,
 
 int gal251_inverse_upper_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
 
-    Gal251Op Operator;
+    Gal251Op Operator = init_gal251_ops();
 
     //init inverse matrix : unit matrix
     for(int i=0; i<n; i++){
@@ -106,7 +119,9 @@ int gal251_inverse_upper_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
     }
 
     // backward substitution
-    for(int i=n-1; i>0; i--){
+    for(int i=n-1; i>=0; i--){
+
+        //error
         if(A[i][i] == 0)
             return 0;
 
@@ -126,9 +141,10 @@ int gal251_inverse_upper_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
     return 1;
 }
 
+
 int gal251_inverse_lower_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
     
-    Gal251Op Operator;
+    Gal251Op Operator = init_gal251_ops();
 
     //init inverse matrix : unit matrix
     for(int i=0; i<n; i++){

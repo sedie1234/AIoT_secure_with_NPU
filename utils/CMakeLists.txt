@@ -6,6 +6,7 @@ set(UTILS_SOURCES
     matrix.c
     model_utils.c
     onnx.pb-c.c
+	key_utils.c
 )
 
 add_library(utils STATIC ${UTILS_SOURCES})
