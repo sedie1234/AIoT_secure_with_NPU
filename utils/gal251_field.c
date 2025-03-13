@@ -89,32 +89,135 @@ uint8_t gal251_mult_inverse(uint8_t a) {
     return (x % 251 + 251) % 251;
 }
 
-void gal251_matrix_multiply(uint8_t **A, uint8_t **B, uint8_t **C, int m, int n, int p){
-    int** _C = allocate_matrix_int(m, p);
+// void gal251_matrix_multiply(uint8_t **A, uint8_t **B, uint8_t **C, int m, int n, int p){
+//     int** _C = allocate_matrix_int(m, p);
+//     Gal251Op field_operator = init_gal251_ops();
+
+//     for (int i = 0; i < m; i++) {
+//         for (int j = 0; j < p; j++) {
+//             _C[i][j] = 0;
+//             for (int k = 0; k < n; k++) {
+//                 _C[i][j] += field_operator.gal251_mult(A[i][k] , B[k][j]);
+//                 if(_C[i][j] > 0x0fffff00)
+//                     _C[i][j] = _C[i][j] % 251;
+//             }
+//             C[i][j] = _C[i][j] % 251;
+//         }
+//     }
+//     free_matrix_int(_C, m);
+// }
+
+// void gal251_matrix_add(uint8_t **A, uint8_t **B, uint8_t **C, int m, int n){
+//     for(int i=0; i<m; i++){
+//         for(int j=0; j<n; j++){
+//             C[i][j] = gal251_add(A[i][j], B[i][j]);
+//         }
+//     }
+// }
+
+void gal251_vector_add(uint8_t *A, uint8_t *B, uint8_t *C, int n){
+    for(int i=0; i<n; i++){
+        C[i] = gal251_add(A[i], B[i]);
+    }
+}
+
+// int gal251_inverse_upper_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
+
+//     Gal251Op Operator = init_gal251_ops();
+
+//     //init inverse matrix : unit matrix
+//     for(int i=0; i<n; i++){
+//         for(int j=0; j<n; j++){
+//             A_inv[i][j] = (i == j) ? 1 : 0;
+//         }
+//     }
+
+//     // backward substitution
+//     for(int i=n-1; i>=0; i--){
+
+//         //error
+//         if(A[i][i] == 0)
+//             return 0;
+
+//         for(int j=i; j<n; j++){
+//             if(i==j){
+//                 A_inv[i][j] = Operator.gal251_div(A_inv[i][j], A[i][j]);
+//             } else {
+//                 for(int k=i+1; k<=j; k++){
+//                     uint8_t temp = Operator.gal251_mult(A[i][k], A_inv[k][j]);
+//                     A_inv[i][j] = Operator.gal251_sub(A_inv[i][j], temp);
+//                 }
+//                 A_inv[i][j] = Operator.gal251_div(A_inv[i][j], A[i][i]);
+//             }
+//         }
+//     }
+
+//     return 1;
+// }
+
+
+// int gal251_inverse_lower_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
+    
+//     Gal251Op Operator = init_gal251_ops();
+
+//     //init inverse matrix : unit matrix
+//     for(int i=0; i<n; i++){
+//         for(int j=0; j<n; j++){
+//             A_inv[i][j] = (i == j) ? 1 : 0;
+//         }
+//     }
+
+//     for(int i=0; i<n; i++){
+//         if(A[i][i] == 0)
+//             return 0;
+        
+//         for(int j=0; j<=i; j++){
+//             if(i == j){
+//                 A_inv[i][j] = Operator.gal251_div(A_inv[i][j], A[i][i]);
+//             }else{
+//                 for(int k=j; k<i; k++){
+//                     uint8_t temp = Operator.gal251_mult(A[i][k], A_inv[k][j]);
+//                     A_inv[i][j] = Operator.gal251_sub(A_inv[i][j], temp);
+//                 }
+//                 A_inv[i][j] = Operator.gal251_div(A_inv[i][j], A[i][i]);
+//             }
+//         }
+//     }
+//     return 1;
+// }
+
+void gal251_matrix_multiply(uint8_t *A, uint8_t *B, uint8_t *C, int m, int n, int p){
+    int* _C = allocate_matrix_int(m, p);
     Gal251Op field_operator = init_gal251_ops();
 
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < p; j++) {
-            _C[i][j] = 0;
+            _C[i*p+j] = 0;
             for (int k = 0; k < n; k++) {
-                _C[i][j] += field_operator.gal251_mult(A[i][k] , B[k][j]);
-                if(_C[i][j] > 0x0fffff00)
-                    _C[i][j] = _C[i][j] % 251;
+                _C[i*p+j] += field_operator.gal251_mult(A[i*n+k] , B[k*p+j]);
+                if(_C[i*p+j] > 0x0fffff00)
+                    _C[i*p+j] = _C[i*p+j] % 251;
             }
-            C[i][j] = _C[i][j] % 251;
+            C[i*p+j] = _C[i*p+j] % 251;
         }
     }
     free_matrix_int(_C, m);
 }
 
-int gal251_inverse_upper_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
+void gal251_matrix_add(uint8_t *A, uint8_t *B, uint8_t *C, int m, int n){
+    for(int i=0; i<m*n; i++){
+        C[i] = gal251_add(A[i], B[i]);
+    }
+}
 
+int gal251_inverse_upper_triangular_matrix(uint8_t *A, uint8_t *A_inv, int n){
+    
     Gal251Op Operator = init_gal251_ops();
 
     //init inverse matrix : unit matrix
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++){
-            A_inv[i][j] = (i == j) ? 1 : 0;
+            A_inv[i*n+j] = (i == j) ? 1 : 0;
         }
     }
 
@@ -122,18 +225,18 @@ int gal251_inverse_upper_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
     for(int i=n-1; i>=0; i--){
 
         //error
-        if(A[i][i] == 0)
+        if(A[i*n+i] == 0)
             return 0;
 
         for(int j=i; j<n; j++){
             if(i==j){
-                A_inv[i][j] = Operator.gal251_div(A_inv[i][j], A[i][j]);
+                A_inv[i*n+j] = Operator.gal251_div(A_inv[i*n+j], A[i*n+j]);
             } else {
                 for(int k=i+1; k<=j; k++){
-                    uint8_t temp = Operator.gal251_mult(A[i][k], A_inv[k][j]);
-                    A_inv[i][j] = Operator.gal251_sub(A_inv[i][j], temp);
+                    uint8_t temp = Operator.gal251_mult(A[i*n+k], A_inv[k*n+j]);
+                    A_inv[i*n+j] = Operator.gal251_sub(A_inv[i*n+j], temp);
                 }
-                A_inv[i][j] = Operator.gal251_div(A_inv[i][j], A[i][i]);
+                A_inv[i*n+j] = Operator.gal251_div(A_inv[i*n+j], A[i*n+i]);
             }
         }
     }
@@ -142,33 +245,34 @@ int gal251_inverse_upper_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
 }
 
 
-int gal251_inverse_lower_triangular_matrix(uint8_t **A, uint8_t **A_inv, int n){
+int gal251_inverse_lower_triangular_matrix(uint8_t *A, uint8_t *A_inv, int n){
     
     Gal251Op Operator = init_gal251_ops();
 
     //init inverse matrix : unit matrix
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++){
-            A_inv[i][j] = (i == j) ? 1 : 0;
+            A_inv[i*n+j] = (i == j) ? 1 : 0;
         }
     }
 
     for(int i=0; i<n; i++){
-        if(A[i][i] == 0)
+        if(A[i*n+i] == 0)
             return 0;
         
         for(int j=0; j<=i; j++){
             if(i == j){
-                A_inv[i][j] = Operator.gal251_div(A_inv[i][j], A[i][i]);
+                A_inv[i*n+j] = Operator.gal251_div(A_inv[i*n+j], A[i*n+i]);
             }else{
                 for(int k=j; k<i; k++){
-                    uint8_t temp = Operator.gal251_mult(A[i][k], A_inv[k][j]);
-                    A_inv[i][j] = Operator.gal251_sub(A_inv[i][j], temp);
+                    uint8_t temp = Operator.gal251_mult(A[i*n+k], A_inv[k*n+j]);
+                    A_inv[i*n+j] = Operator.gal251_sub(A_inv[i*n+j], temp);
                 }
-                A_inv[i][j] = Operator.gal251_div(A_inv[i][j], A[i][i]);
+                A_inv[i*n+j] = Operator.gal251_div(A_inv[i*n+j], A[i*n+i]);
             }
         }
     }
     return 1;
 }
+
 #endif //GAL251_FIELD_C

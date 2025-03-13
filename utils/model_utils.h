@@ -122,6 +122,46 @@ void delete_input_from_string(Onnx__ModelProto *model, char* name);
 */
 Onnx__AttributeProto** create_new_attribute(const char **names, Onnx__AttributeProto__AttributeType *types, void **values, size_t n_attributes);
 
+/*** Get Attribute ***/
+/*
+    * Get the attribute of a node by name
+    * @param node: pointer to the node
+    * @return Onnx__AttributeProto: pointer to the attribute, NULL if the attribute does not exist
+    * Usage : Onnx__AttributeProto **attr = get_attribute(node);
+*/
+Onnx__AttributeProto* get_attribute(Onnx__NodeProto *node);
+
+/*** Get Attributes ***/
+/*
+    * Get the attributes of a model
+    * @param model: pointer to the ONNX model
+    * @return Onnx__AttributeProto: pointer to the attributes
+    * Usage : Onnx__AttributeProto **attributes = get_attributes(model);
+*/
+Onnx__AttributeProto** get_attributes(Onnx__ModelProto *model);
+
+/*** Free Attribute ***/
+/*
+    * Free the memory allocated for an attribute
+    * if the attribute used in the model, it should be removed from the model before freeing
+    * or the attribute automatically freed when the model is freed
+    * @param attribute: pointer to the attribute to free
+    * @return void
+    * Usage : free_attribute(attribute);
+*/
+void* free_attribute(Onnx__AttributeProto *attribute);
+
+/*** Free Attributes ***/
+/*
+    * Free the memory allocated for an array of attributes
+    * if the attributes used in the model, it should be removed from the model before freeing
+    * or the attributes automatically freed when the model is freed
+    * @param attributes: pointer to the attributes to free
+    * @return void
+    * Usage : free_attributes(attributes);
+*/
+void* free_attributes(Onnx__AttributeProto **attributes, size_t n_attributes);
+
 /*** Create New Node ***/
 /*
     * Create a new node
@@ -290,6 +330,7 @@ char** get_node_inputs(Onnx__ModelProto *model, char* node_name);
     * Usage : char** outputs = get_node_outputs(model, "node");
 */
 char** get_node_outputs(Onnx__ModelProto *model, char* node_name);
+
 
 
 #endif // MODEL_UTILS_H

@@ -430,6 +430,68 @@ Onnx__AttributeProto** create_new_attribute(const char **names, Onnx__AttributeP
     return new_attributes;
 }
 
+Onnx__AttributeProto* get_attribute(Onnx__NodeProto *node){
+    if (!node) {
+        return NULL;
+    }
+
+    return node->attribute;
+}
+
+Onnx__AttributeProto** get_attributes(Onnx__ModelProto *model){
+    if (!model || !model->graph) {
+        perror("Model or graph is NULL");
+        return NULL;
+    }
+
+    Onnx__AttributeProto **attributes = malloc(model->graph->n_node * sizeof(Onnx__AttributeProto *));
+    if (!attributes) {
+        perror("Memory allocation failed");
+        return NULL;
+    }
+
+    for (size_t i = 0; i < model->graph->n_node; i++) {
+        attributes[i] = model->graph->node[i]->attribute;
+    }
+
+    return attributes;
+}
+
+void* free_attribute(Onnx__AttributeProto *attribute){
+    if (!attribute) {
+        printf("Attribute is NULL\n");
+        return NULL;
+    }
+
+    if (attribute->name) {
+        free(attribute->name);
+    }
+
+    if (attribute->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__STRING) {
+        if (attribute->s.data) {
+            free(attribute->s.data);
+        }
+    }
+
+    free(attribute);
+
+    return NULL;
+}
+
+void* free_attributes(Onnx__AttributeProto **attributes, size_t n_attributes){
+    if (!attributes) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < n_attributes; i++) {
+        free_attribute(attributes[i]);
+    }
+
+    free(attributes);
+    attributes = NULL;
+
+    return NULL;
+}
 
 Onnx__NodeProto* create_new_node(const char *name, const char *op_type, const char *domain, const char *overload, 
                                 Onnx__AttributeProto **attribute, size_t n_attribute, const char *doc_string){
