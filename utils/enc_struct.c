@@ -123,6 +123,53 @@ void save_enc_model(EncModel enc_model, const char *filename){
     return;
 }
 
+void load_enc_model(EncModel *enc_model, const char *filename){
+    FILE *fp = fopen(filename, "rb");
+    if (!fp) {
+        perror("Failed to open file");
+        return;
+    }
+
+    fread(&enc_model->MAC_w, sizeof(int), 1, fp);
+    fread(&enc_model->h, sizeof(int), 1, fp);
+    fread(&enc_model->n_nodes, sizeof(int), 1, fp);
+    fread(&enc_model->n_inits, sizeof(int), 1, fp);
+    fread(&enc_model->n_model_inputs, sizeof(int), 1, fp);
+    fread(&enc_model->n_model_outputs, sizeof(int), 1, fp);
+
+    enc_model->inputs = malloc(enc_model->n_model_inputs * sizeof(TensorPack));
+    enc_model->outputs = malloc(enc_model->n_model_outputs * sizeof(TensorPack));
+
+    for(int i=0; i<enc_model->n_model_inputs; i++){
+        fread(&enc_model->inputs[i].data_type, sizeof(Onnx__TensorProto__DataType), 1, fp);
+        fread(&enc_model->inputs[i].n_dims, sizeof(size_t), 1, fp);
+        enc_model->inputs[i].dims = malloc(enc_model->inputs[i].n_dims * sizeof(size_t));
+        fread(enc_model->inputs[i].dims, sizeof(size_t), enc_model->inputs[i].n_dims, fp);
+    }
+
+    for(int i=0; i<enc_model->n_model_outputs; i++){
+        fread(&enc_model->outputs[i].data_type, sizeof(Onnx__TensorProto__DataType), 1, fp);
+        fread(&enc_model->outputs[i].n_dims, sizeof(size_t), 1, fp);
+        enc_model->outputs[i].dims = malloc(enc_model->outputs[i].n_dims * sizeof(size_t));
+        fread(enc_model->outputs[i].dims, sizeof(size_t), enc_model->outputs[i].n_dims, fp);
+    }
+
+    fread(&enc_model->lpos, sizeof(int), 1, fp);
+    fread(&enc_model->upos, sizeof(int), 1, fp);
+    fread(&enc_model->bpos, sizeof(int), 1, fp);
+
+    enc_model->enc_conninfo_mat = malloc(enc_model->h*enc_model->MAC_w);
+    fread(enc_model->enc_conninfo_mat, sizeof(uint8_t), enc_model->h*enc_model->MAC_w, fp);
+
+    enc_model->enc_conninfo_mat_bit_info = malloc(enc_model->h*enc_model->MAC_w/8 + enc_model->h*enc_model->MAC_w%8);
+    fread(enc_model->enc_conninfo_mat_bit_info, sizeof(uint8_t), 
+            enc_model->h*enc_model->MAC_w/8 + enc_model->h*enc_model->MAC_w%8, fp);
+    
+    enc_model->inits = malloc(enc_model->n_inits * sizeof(TensorPack));
+    fread(enc_model->inits, sizeof(TensorPack), enc_model->n_inits, fp);
+
+}
+
 void free_enc_model(EncModel *enc_model){
     for(int i=0; i<enc_model->n_model_inputs; i++){
         free(enc_model->inputs[i].dims);

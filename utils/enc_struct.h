@@ -8,6 +8,18 @@
 
 #include "onnx.pb-c.h"
 
+typedef struct{
+    int file_size;
+    int size;
+    int w;
+    int h;
+    int bit_buffer_size;
+    int upos;
+    int lpos;
+    int bpos;
+    uint8_t* enc_data_val;
+    uint8_t* enc_data_bit;
+}EncFile;
 
 typedef struct{
     Onnx__TensorProto__DataType data_type;
