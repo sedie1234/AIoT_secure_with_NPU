@@ -3,13 +3,11 @@
 #include <string.h>
 #include <time.h>
 
-#include "model_utils.h"
-#include "onnx.pb-c.h"
-#include "decrypt.h"
 #include "key_utils.h"
 #include "matrix.h"
 #include "gal251_field.h"
 #include "enc_struct.h"
+#include "../gemm_test/npu_gemm.h"
 
 void printBuffer(uint8_t* buffer, int length, int line_length);
 
@@ -79,27 +77,40 @@ int main(int argc, char *argv[]) {
     uint8_t* X = allocate_matrix_uint8(enc_file.h, enc_file.w);
     uint8_t* X_ = allocate_matrix_uint8(enc_file.h, enc_file.w);
 
+    uint32_t* npu_buffer;
     
     printf("Y\n");
     printBuffer(enc_file.enc_data_val, 160, 16);
 
     // 5. decrypt stage
+    init_kgemm();
+    printf("npu initialized!\n");
     // gal251_matrix_multiply(L, U, LU, enc_file.w, enc_file.w, enc_file.w);
-    gemm_nn_npu(enc_file.w, enc_file.w, enc_file.w, L, enc_file.w, U, enc_file.w, LU, enc_file.w);
+    npu_buffer = (uint32_t*)malloc(enc_file.w * enc_file.w * sizeof(uint32_t));
+    gemm_nn_npu(enc_file.w, enc_file.w, enc_file.w, 1, L, enc_file.w, U, enc_file.w, npu_buffer, enc_file.w);
     for(int i = 0; i < enc_file.w * enc_file.w; i++){
-        LU[i] = LU[i] % 251;
+        LU[i] = npu_buffer[i] % 251;
     }
+    free(npu_buffer);
+    printf("npu : get LU!\n");
     gal251_matrix_sub(enc_file.enc_data_val, B, X_, enc_file.h, enc_file.w);
     
+    printf("LU\n");
+    printBuffer(LU, 160, 16);
+
     printf("Y-B\n");
     printBuffer(X_, 160, 16);
 
     // gal251_matrix_multiply(X_, LU, X, enc_file.h, enc_file.w, enc_file.w);
     // suppose enc_file.h < s^23
-    gemm_nn_npu(enc_file.h, enc_file.w, enc_file.w, X_, enc_file.w, LU, enc_file.w, X, enc_file.w);
+
+    npu_buffer = (uint32_t*)malloc(enc_file.h * enc_file.w * sizeof(uint32_t));
+    memset(npu_buffer, 0, enc_file.h * enc_file.w * sizeof(uint32_t));
+    gemm_nn_npu(enc_file.h, enc_file.w, enc_file.w, 1, X_, enc_file.w, LU, enc_file.w, npu_buffer, enc_file.w);
     for(int i = 0; i < enc_file.h * enc_file.w; i++){
-        X[i] = X[i] % 251;
+        X[i] = npu_buffer[i] % 251;
     }
+    free(npu_buffer);
     printf("X = (Y-B)LU\n");
     printBuffer(X, 160, 16);
     

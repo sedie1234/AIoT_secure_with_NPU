@@ -4,8 +4,8 @@ project(utils)
 set(UTILS_SOURCES
     gal251_field.c
     matrix.c
-    model_utils.c
-    onnx.pb-c.c
+    #    model_utils.c
+    #onnx.pb-c.c
 	key_utils.c
     enc_struct.c
 )
@@ -14,4 +14,4 @@ add_library(utils STATIC ${UTILS_SOURCES})
 
 target_include_directories(utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(utils PRIVATE protobuf-c)
+#target_link_libraries(utils PRIVATE protobuf-c)

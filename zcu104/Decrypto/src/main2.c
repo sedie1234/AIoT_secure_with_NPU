@@ -3,9 +3,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "model_utils.h"
-#include "onnx.pb-c.h"
-#include "decrypt.h"
 #include "key_utils.h"
 #include "matrix.h"
 #include "gal251_field.h"

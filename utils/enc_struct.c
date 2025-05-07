@@ -7,13 +7,14 @@
 #include <stdint.h>
 
 #include "enc_struct.h"
-#include "model_utils.h"
-#include "onnx.pb-c.h"
+//#include "model_utils.h"
+//#include "onnx.pb-c.h"
 // #include "encrypt.h"
 #include "key_utils.h"
 #include "matrix.h"
 #include "gal251_field.h"
 
+/*
 EncModel init_enc_model(Onnx__ModelProto *model, int mac_w){
     EncModel enc_model;
     enc_model.MAC_w = mac_w;
@@ -193,4 +194,6 @@ void free_enc_model(EncModel *enc_model){
 
     return;
 }
+*/
+
 #endif //ENC_STRUCT_C

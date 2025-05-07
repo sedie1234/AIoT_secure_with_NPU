@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "onnx.pb-c.h"
+//#include "onnx.pb-c.h"
 
 typedef struct{
     int file_size;
@@ -21,6 +21,7 @@ typedef struct{
     uint8_t* enc_data_bit;
 }EncFile;
 
+/*
 typedef struct{
     Onnx__TensorProto__DataType data_type;
     size_t n_dims;
@@ -51,5 +52,5 @@ EncModel init_enc_model(Onnx__ModelProto *model, int mac_w);
 void save_enc_model(EncModel enc_model, const char *filename);
 void load_enc_model(EncModel *enc_model, const char *filename);
 void free_enc_model(EncModel *enc_model);
-
+*/
 #endif //ENC_STRUCT_H

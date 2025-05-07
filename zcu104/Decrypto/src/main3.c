@@ -3,9 +3,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "model_utils.h"
-#include "onnx.pb-c.h"
-#include "decrypt.h"
 #include "key_utils.h"
 #include "matrix.h"
 #include "gal251_field.h"
@@ -87,6 +84,9 @@ int main(int argc, char *argv[]) {
     gal251_matrix_multiply(L, U, LU, enc_file.w, enc_file.w, enc_file.w);
     gal251_matrix_sub(enc_file.enc_data_val, B, X_, enc_file.h, enc_file.w);
     
+    printf("LU\n");
+    printBuffer(LU, 160, 16);
+
     printf("Y-B\n");
     printBuffer(X_, 160, 16);
 

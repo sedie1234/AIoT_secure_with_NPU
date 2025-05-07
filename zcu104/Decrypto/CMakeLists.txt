@@ -3,10 +3,10 @@ project(Decrypto)
 
 add_subdirectory(../../utils utils_build)
 
-set(SOURCES src/decrypt.c
-            src/main.c)
+#set(SOURCES src/decrypt.c
+#            src/main.c)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 
 #add_executable(decrypto ${SOURCES})
 
@@ -22,8 +22,7 @@ set(DATA_DECRYPT_SOURCES src/main2.c)
 add_executable(decrypt_data ${DATA_DECRYPT_SOURCES})
 
 target_link_libraries(decrypt_data PRIVATE 
-                    utils
-                    ${PROTOBUF_C_LIBRARIES})
+                    utils)
 
 target_include_directories(decrypt_data PRIVATE ../../utils)
 
@@ -33,18 +32,17 @@ set(DATA_DECRYPT_SOURCES src/main3.c)
 add_executable(decrypt_file_cpu ${DATA_DECRYPT_SOURCES})
 
 target_link_libraries(decrypt_file_cpu PRIVATE 
-                    utils
-                    ${PROTOBUF_C_LIBRARIES})
+                    utils)
 
 target_include_directories(decrypt_file_cpu PRIVATE ../../utils)
 
 ############# file decrypt #########
-set(DATA_DECRYPT_SOURCES src/main4.c)
+set(DATA_DECRYPT_SOURCES src/main4.c
+			gemm_test/npu_gemm.c)
 
 add_executable(decrypt_file_npu ${DATA_DECRYPT_SOURCES})
 
 target_link_libraries(decrypt_file_npu PRIVATE 
-                    utils
-                    ${PROTOBUF_C_LIBRARIES})
+                    utils)
 
 target_include_directories(decrypt_file_npu PRIVATE ../../utils)
